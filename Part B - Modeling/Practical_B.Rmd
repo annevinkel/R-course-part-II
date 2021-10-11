@@ -1,5 +1,5 @@
 ---
-title: "Practical C"
+title: "Practical B"
 author: "Jolien Cremers (adapted from Gerko Vink)"
 date: "Statistical Programming in R"
 output: html_document
@@ -9,29 +9,37 @@ output: html_document
 require(MASS)
 require(DAAG)
 require(ggplot2)
+require(splines)
 ```
 
 
 ---
 
-#### Exercises
+### Exercises
 
 ---
 
 The following packages are required for this practical:
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(dplyr)
 library(magrittr)
 library(mice)
 library(ggplot2)
 library(DAAG)
+library(MASS)
+library(broom)
 ```
+These exercises deal with modeling data in `R`. We will explore the workhorse `lm` function for linear modeling as well as a robust regression function found in the `MASS` package and the `glm` function for generalized linear models (including logistic regression). You will see that the interface to modeling is very similar across packages. Model output can be less similar, something which the `broom` package attempts to remedy. 
 
 ---
+
+#### Using the `lm` function to model the stretch of rubber bands. 
 
 The data sets `elastic1` and `elastic2` from the package `DAAG` were obtained
 using the same apparatus, including the same rubber band, as the data frame
 `elasticband`. 
+
+As this is a very small data set, some of the issues met in modeling it are such as we will not often run into when working with official statistics. 
 
 1. **Using a different symbol and/or a different color, plot the data
 from the two data frames `elastic1` and `elastic2` on the same graph. Do the two
@@ -47,12 +55,13 @@ distance on stretch. In each case determine:**
 
 Compare the two sets of results. What is the key difference between the two sets
 of data?
+---
+
+3. **Look at the plot function for lm class. (Hint: ?plot.lm). The function produces a number of  diagnostic plots for fitted linear models. Study the *residual vs leverage* plots for both models.**
 
 ---
 
-3. **Study the *residual vs leverage* plots for both models. Hint use `plot()` on the fitted object**
-
----
+#### Continuing modeling the stretch of rubber bands using robust regression. 
 
 4. **Use the robust regression function `rlm()` from the `MASS` package to fit lines to the data in `elastic1` and `elastic2`. Compare the results with those from use of `lm()`:**
 
@@ -63,6 +72,8 @@ of data?
 
 ---
 
+#### Rubber bands continued - predicting outcomes on new data from a fitted model
+
 5. **Use the `elastic2` variable `stretch` to obtain predictions on the model fitted on `elastic1`.**
 
 ---
@@ -71,26 +82,23 @@ of data?
 
 ---
 
-The mammalsleep dataset is part of `mice`. It contains the Allison and Cicchetti (1976) data for mammalian species. To learn more about this data, type
-```{r}
-?mammalsleep
-```
+#### Logistic regression using the glm function
 
---- 
+Often, a linear normal regression is not what we want to use. A typical example is when we have data with two classes and want to do logistic regression. Googling (or background knowledge and typing `?glm` into the console) suggests that the `glm` function is the obvious choice here. 
 
-7. **Fit and inspect a model where `brw` is modeled from `bw`**
+In the next exercises, we explore the anesthetic dataset: Thirty patients were given an anesthetic agent maintained at a predetermined level (conc) for 15 minutes before making an incision. It was then noted whether the patient moved, i.e. jerked or twisted
 
 ---
 
-8. **Now fit and inspect a model where `brw` is predicted from both `bw` and `species`**
+7. **Look at the documentation for the `anesthetic` dataset. Regresss the binary outcome nomove on the anesthetic concentration**
 
 ---
 
-9. **Can you find a model that improves the $R^2$ in modeling `brw`?**
+8. **Logistic regression can also be performed on aggregated datasets, regressing the proportion with the outcome on the predictor variable(s). Construct the aggregated data frame listing number of patients moving and not moving for each level of anesthetic, and perform the previous regression on the aggregated data**
 
 ---
 
-10. **Inspect the diagnostic plots for the model obtained in `exercise 12`. What issues can you detect?**
+9. **We are assuming a linear relationship between move and conc. Fit a model including a quadratic term, and one using a spline to model the relationship**
 
 ---
 

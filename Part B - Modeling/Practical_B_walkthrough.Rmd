@@ -1,5 +1,5 @@
 ---
-title: "Practical C"
+title: "Practical B"
 author: "Jolien Cremers (adapted from Gerko Vink)"
 date: "Statistical Programming in R"
 output: html_document
@@ -9,39 +9,44 @@ output: html_document
 require(MASS)
 require(DAAG)
 require(ggplot2)
+require(splines)
 ```
 
 
 ---
 
-#### Exercises
+### Exercises
 
 ---
 
 The following packages are required for this practical:
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(dplyr)
 library(magrittr)
 library(mice)
 library(ggplot2)
 library(DAAG)
 library(MASS)
+library(broom)
 ```
+These exercises deal with modeling data in `R`. We will explore the workhorse `lm` function for linear modeling as well as a robust regression function found in the `MASS` package and the `glm` function for generalized linear models (including logistic regression). You will see that the interface to modeling is very similar across packages. Model output can be less similar, something which the `broom` package attempts to remedy. 
 
 ---
+
+#### Using the `lm` function to model the stretch of rubber bands. 
 
 The data sets `elastic1` and `elastic2` from the package `DAAG` were obtained
 using the same apparatus, including the same rubber band, as the data frame
 `elasticband`. 
+
+As this is a very small data set, some of the issues met in modeling it are such as we will not often run into when working with official statistics. 
 
 1. **Using a different symbol and/or a different color, plot the data
 from the two data frames `elastic1` and `elastic2` on the same graph. Do the two
 sets of results appear consistent?**
 
 ```{r}
-elastic <- rbind(elastic1, elastic2)
-elastic$source <- c(rep("Elastic1", nrow(elastic1)), 
-                    rep("Elastic2", nrow(elastic2)))
+elastic <- bind_rows("elastic1"=elastic1, "elastic2"=elastic2, .id = "source" )
 
 elastic %>%
   ggplot(aes(stretch, distance, colour = source)) +
@@ -66,13 +71,9 @@ of data?
 
 First we run the two models:
 ```{r}
-fit1 <- 
-  elastic1 %$%
-  lm(distance ~ stretch)
+fit1 <- lm(distance ~ stretch, data=elastic1)
 
-fit2 <- 
-  elastic2 %$%
-  lm(distance ~ stretch)
+fit2 <- lm(distance ~ stretch, data=elastic2)
 ```
 
 and then we compare the fitted values
@@ -88,7 +89,7 @@ fit1 %>% summary()
 fit2 %>% summary()
 ```
 
-Or we can grab the $R^2$ directly from the object without a pipe
+Or we can grab the $R^2$ directly from the object without a pipe - note that $R^2$ lives in the `summary` of the fit object, not in the fit object itself.
 ```{r}
 summary(fit1)$r.squared
 summary(fit2)$r.squared
@@ -98,7 +99,12 @@ This is due to the larger range of values in `elastic2`, and the absence of an o
 
 ---
 
-3. **Study the *residual vs leverage* plots for both models. Hint use `plot()` on the fitted object**
+3. **Look at the plot function for lm class. (Hint: ?plot.lm). The function produces a number of  diagnostic plots for fitted linear models. Study the *residual vs leverage* plots for both models.**
+
+```{r}
+?plot.lm
+```
+Note that you can ask for specific plots using the `which` argument to the function. The plots produced are "Residuals vs Fitted", "Normal Q-Q", "Scale-Location", "Cook's distance","Residuals vs Leverage" and "Cook's dist vs Leverage" - by default, plots 1, 2, 3 and 5 are shown. 
 
 ```{r}
 fit1 %>% plot(which = 5) #the fifth plot is the residuals vs leverage plot
@@ -114,9 +120,11 @@ As we can see, case 7 has the largest residual.
 
 ---
 
-Because there is a single value that influences the estimation and is somewhat different than the other values, a robust form of regression may be advisable to obtain more stable estimates. When robust methods are used, we refrain from omitting a suspected outlier from our analysis. In general, with robust analysis, influential cases that are not conform the other cases receive less weight in the estimation procedure then under non-robust analysis.
+Because there is a single value that influences the estimation and is somewhat different than the other values, a robust form of regression may be advisable to obtain more stable estimates. 
 
 ---
+
+#### Continuing modeling the stretch of rubber bands using robust regression. 
 
 4. **Use the robust regression function `rlm()` from the `MASS` package to fit lines to the data in `elastic1` and `elastic2`. Compare the results with those from use of `lm()`:**
 
@@ -127,44 +135,27 @@ Because there is a single value that influences the estimation and is somewhat d
 
 First, we run the same models again with `rlm()`
 ```{r}
-fit1.rlm <- 
-  elastic1 %$%
-  rlm(distance ~ stretch)
+fit1.rlm <- rlm(distance ~ stretch, data = elastic1)
 
-fit2.rlm <- 
-  elastic2 %$%
-  rlm(distance ~ stretch)
+fit2.rlm <- rlm(distance ~ stretch, data = elastic2)
 ```
 
-and then we look at the coefficients and the residuals
+and then we look at the coefficients and the residuals - the `broom` package is useful for tidying up the output of regression models
 ```{r}
-data.frame(lm = coef(fit1), 
-           rlm = coef(fit1.rlm))
+bind_rows( "lm" = tidy(fit1), "rlm"=tidy(fit1.rlm), .id = "model")
 
-data.frame(lm = coef(fit2), 
-           rlm = coef(fit2.rlm))
+bind_rows( "lm" = tidy(fit2), "rlm"=tidy(fit2.rlm), .id = "model")
 ```
 
 We see that the coefficients for `elastic1` are different for `lm()` and `rlm()`. The coefficients for `elastic2` are very similar. 
-
-To study the standard errors of the coefficients:
-```{r}
-data.frame(lm = summary(fit1)$coefficients[, "Std. Error"], 
-           rlm = summary(fit1.rlm)$coefficients[, "Std. Error"])
-
-data.frame(lm = summary(fit2)$coefficients[, "Std. Error"], 
-           rlm = summary(fit2.rlm)$coefficients[, "Std. Error"])
-```
 
 The standard errors for the estimates for `elastic1` have become much smaller with `rlm()` compared to standard `lm()` estimation. The standard errors for `elastic2` are very similar. 
 
 To study the residuals:
 ```{r}
-data.frame(lm = residuals(fit1), 
-           rlm = residuals(fit1.rlm))
+tibble("lm" = residuals(fit1),"rlm" = residuals(fit1.rlm))
 
-data.frame(lm = residuals(fit2), 
-           rlm = residuals(fit2.rlm))
+tibble("lm" = residuals(fit2),  "rlm" = residuals(fit2.rlm))
 ```
 
 The residual trend for both models is very similar. Remember that different values will still be different under robust analyses; they are only given less influence. 
@@ -184,8 +175,9 @@ The case 2 residual in elastic1 is smaller in the robust regression. This is
 because the case had less weight in the `rlm()` estimation of the coefficients than
 in the ordinary `lm()` regression.
 
-
 ---
+
+#### Rubber bands continued - predicting outcomes on new data from a fitted model
 
 5. **Use the `elastic2` variable `stretch` to obtain predictions on the model fitted on `elastic1`.**
 
@@ -197,11 +189,9 @@ pred <- predict.lm(fit1, newdata = data.frame(stretch = elastic2$stretch))
 
 6. **Now make a scatterplot to investigate similarity between plot the predicted values against the observed values for `elastic2`**
 ```{r}
-new.dat <- data.frame(stretch = elastic2$stretch, 
-                      distance = c(elastic2$distance, pred))
-
-new.dat$source <- c(rep("original", nrow(elastic2)), 
-                    rep("predicted", nrow(elastic2)))
+new.dat <- bind_rows( "original" = elastic2 %>% select(stretch, distance),
+                      "predicted" = bind_cols( stretch=elastic2$stretch, distance = pred)
+                    , .id = "source")
 
 new.dat %>%
   ggplot(aes(stretch, distance, colour = source)) +
@@ -211,7 +201,7 @@ new.dat %>%
 
 The predicted values are very similar to the observed values:
 ```{r}
-data.frame(distance = elastic2$distance, predicted = pred) %>%
+bind_cols(distance = elastic2$distance, predicted = pred) %>%
   ggplot(aes(distance, predicted)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1)
@@ -220,145 +210,69 @@ data.frame(distance = elastic2$distance, predicted = pred) %>%
 
 They do not strictly follow the straight line because there is some modeling error: we use `elastic1`'s model to predict `elastic2`'s distance [error source 1] and we compare those predictions to `elastic2`'s observed distance [error source 2]. However, if you consider the modeling, these predictions are very accurate and have high correlations with the observed values:
 ```{r}
-data.frame(distance = elastic2$distance, predicted = pred) %>%
+bind_cols(distance = elastic2$distance, predicted = pred) %>%
   cor() 
 ```
 
 ---
 
-The mammalsleep dataset is part of `mice`. It contains the Allison and Cicchetti (1976) data for mammalian species. To learn more about this data, type
+#### Logistic regression using the glm function
+
+Often, a linear normal regression is not what we want to use. A typical example is when we have data with two classes and want to do logistic regression. Googling (or background knowledge and typing `?glm` into the console) suggests that the `glm` function is the obvious choice here. 
+
+In the next exercises, we explore the anesthetic dataset: Thirty patients were given an anesthetic agent maintained at a predetermined level (conc) for 15 minutes before making an incision. It was then noted whether the patient moved, i.e. jerked or twisted
+
+---
+
+7. **Look at the documentation for the `anesthetic` dataset. Regresss the binary outcome nomove on the anesthetic concentration**
 ```{r}
-?mammalsleep
+help("anesthetic")
+anesthetic %>% head()
+```
+The data contains the variables move (movement indicator), conc (anesthetic concentration), logconc (logarithm of concentration) and nomove (the complement of move)
+
+```{r}
+glm(nomove ~ conc, family = binomial(link="logit"), data=anesthetic) %>% summary()
 ```
 
---- 
+---
 
-7. **Fit and inspect a model where `brw` is modeled from `bw`**
+8. **Logistic regression can also be performed on aggregated datasets, regressing the proportion with the outcome on the predictor variable(s). Construct the aggregated data frame listing number of patients moving and not moving for each level of anesthetic, and perform the previous regression on the aggregated data**
+
+One approach to aggregating the data would be the following - see also the `aggregate` function. 
 ```{r}
-mammalsleep %$%
-  lm(brw ~ bw) %>%
-  anova()
+anestot <- anesthetic %>% 
+  group_by( conc ) %>% 
+  summarise( move = sum(move), nomove = sum(nomove)) %>% 
+  mutate( total = move + nomove
+        , prop = nomove / total)
+
+anestot
 ```
-It seems that we can model brain weight `brw` with body weight `bw`. If we inspect the linear model, we see that the $R^2$ is quite high:
+
+To run logistic regression on the aggregated table, we model prop as a function of conc, and use the weights argument:
 ```{r}
-mammalsleep %$%
-  lm(brw ~ bw) %>%
+glm(prop ~ conc, 
+    family = binomial(link="logit"), 
+    weights = total, 
+    data=anestot) %>% 
   summary()
 ```
 
 ---
 
-8. **Now fit and inspect a model where `brw` is predicted from both `bw` and `species`**
+9. **We are assuming a linear relationship between move and conc. Fit a model including a quadratic term, and one using a spline to model the relationship**
+
+One approach is to include the square of conc as a variable in the data, another is to use the `I` function to isolate the square term in the formula.
+
 ```{r}
-mammalsleep %$%
-  lm(brw ~ bw + species) %>%
-  anova()
+glm(nomove ~ conc + I(conc^2), family = binomial(link="logit"), data=anesthetic) %>% summary()
 ```
 
-There seems to be a perfect fit and we don't get any p-values. If we inspect the linear model `summary()`, we find that every animal only is observed once. Adding species as a predictor yields the most overfitted model we may obtain and our residuals drop effectively to zero. 
+Base `R` includes functions for fitting simple polynomial and smoothing splines. More functions are included in the `splines` package. We shall use a natural spline with three degrees of freedom. 
 
 ```{r}
-mammalsleep %$%
-  lm(brw ~ bw + species) %>%
-  summary()
-```
-
-The analysis we ran is in fact equivalent to running a fixed effects model on clusters of size 1. Since in that scenario there is no clustering, we should omit the fixed effect for `species` and just model the random variation (in this case done by the residual variance).
-
----
-
-9. **Can you find a model that improves the $R^2$ in modeling `brw`?**
-
-Since we're considering linear models so far, I limit myself to linear models only. The basis of the linear model is the variance covariance matrix and how it translates to data relations. This is most easily linearly summarized in the correlation matrix:
-```{r}
-mammalsleep %>%
-  subset(select = -species) %>% #exclude factor species
-  cor(use = "pairwise.complete.obs") #pairwise deletion
-```
-
-This matrix contains quite a few cells. To obtain only the correlations with `brw` we could select the respective column:
-```{r}
-mammalsleep %>%
-  subset(select = -species) %>% #exclude factor species
-  cor(use = "pairwise.complete.obs") %>% #pairwise deletion
-  subset(select = brw) #only column brw from the correlation matrix
-```
-
-It seems that the following variables have a rather nice relation with `brw`:
-
-- `sws`: short wave sleep
-- `ts` : total sleep
-- `mls`: maximum life span
-- `gt` : gestation time
-- `sei`: sleep exposure index
-
-However, from the larger correlation matrix we can also see that `ts` is highly colinear with `sws` - in fact, `ts` is calculated as the sum over `sws` and `ps`. Including both variables will not hurt our $R^2$ per se, but it will certainly trouble the precision of our estimation as including both variables will yield much larger standard errors. It may be wise to select `sws` as a predictor: `ts` contains a source of *error* in the form of `ps`, so its linear association with `brw` is slightly weaker. However, `sws` misses 14 cases and `ts` misses only 4. 
-```{r}
-mammalsleep %>%
-  summary()
-```
-
-Therefore it is highly preferable to use `ts` in the model, despite its weaker association.
-
-We run the new model:
-```{r}
-fit <- 
-  mammalsleep %$%
-  lm(brw ~ bw + ts + mls + gt + sei)
-  
-fit %>%
-  summary()
-```
-and we have obtained a very high $R^2$. If prediction was our goal, we are doing great.
-
----
-
-10. **Inspect the diagnostic plots for the model obtained in `exercise 12`. What issues can you detect?**
-```{r}
-fit %>%
-  plot(which = 1:6)
-```
-
-Some issues spring to mind:
-
-- There error variance seems to be heteroscedastic [but we have a rather small sample]
-- The residuals are not normally distributed in the extreme tails
-- The following case has a large leverage: 1
-- The following case has large residual: 5
-```{r}
-mammalsleep$species[c(1, 5)]
-```
-
-If we sort the `brw` variable together with its strongest predictor 
-```{r}
-mammalsleep %>% 
-  subset(select = c(species, brw, bw, ts, mls, gt, sei)) %>%
-  arrange(desc(brw)) #sort the data in descending order based on brw
-```
-
-we see that `Man` has a large `brw` for small `bw` and that `African elephant` is so large that it massively influences the model. For `Man` we would expect a much lighter brain given its body weight. We can also see this from the residuals:
-```{r}
-fit %>%
-  residuals()
-```
-
-from the influence statistics:
-```{r}
-fit %>%
-  influence()
-```
-From the influence we see:
-
-- the residual standard deviation `$sigma` would drop when the first case and the fifth case would be omitted.
-- the coefficients `$coefficients$ would dramatically change if cases 1 and 5 were omitted
-
-The `influence(fit)$coefficients` is equivalent to the `dfbeta()` return:
-```{r}
-head(influence(fit)$coefficients)
-
-fit %>%
-  dfbeta() %>%
-  head()
+glm(nomove ~ ns(conc, df = 3), family = binomial(link="logit"), data=anesthetic) %>% summary()
 ```
 
 ---

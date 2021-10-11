@@ -11,7 +11,6 @@ output:
 This dashboard covers the materials for the first follow-up course in R programming.  The course is held in Tbilisi, on October 19th to 21st 2021 . The course website of the introductory course can be found [here](https://annevinkel.github.io/RGeorgia/).
 
 ---
-
 Instructors: 
 
  - Anne Vinkel Hansen (aih@dst.dk)
@@ -19,7 +18,6 @@ Instructors:
 
 
 ---
-
 Part of the material for this course is adapted from [Gerko Vink](https://github.com/gerkovink/R), with gratitude
 
 
@@ -49,18 +47,22 @@ Previous experience with R is required.
 | Time        | Topic                                           |
 |:------------|:------------------------------------------------|
 | *Tuesday*   |                                                 |
-| 09.00-12.00 | Repetition and "Tidy data" (A)                  |
+| 10.00-13.00 | Repetition and "Tidy data" (A)                  |
 |             | *Break*                                         |    
-| 13.00-15.30 | Statistical modeling (B)                        |
+| 14.00-17.00 | Statistical modeling (B)                        |
 | *Wednesday* |                                                 |
-| 09.00-12.00 | Data Validation and Editing (C)                 |
+| 10.00-13.00 | Data Validation and Editing (C)                 |
 |             | *Break*                                         |             
-| 13.00-15.30 | Imputation (D)                                  |
+| 14.00-17.00 | Imputation (D)                                  |
 | *Thursday*  |                                                 |
-| 09.00-12.00 | Workshop - bring your own data (E)              |
+| 10.00-13.00 | Workshop - bring your own data (E)              |
 |             | *Break*                                         |
-| 13.00-15.30 | Summary (F)                                     |
+| 14.00-17.00 | Summary (F)                                     |
 
+
+Each 3-hour block consists of approximately 1 hour of lectures, a coffee break and practicals plus a short follow-up on the practicals by the lecturers.  
+
+The workshop on Thursday is a "free play" exercise, where you can work with your own data and try to use `R` to replicate previous analyses. We ask you to bring your own data and make a plan for what you want to do with the data - this does not necessarily have to be related to the subjects covered in this part of the course. We would prefer that you make sure you can read data into `R` before the workshop, so time can be used on analysis rather than reading in data. 
 
 # How to prepare
 
