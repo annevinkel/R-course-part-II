@@ -6,23 +6,20 @@ output:
     vertical_layout: scroll
 ---
 
-# Intro {.sidebar}
+---
+# Quick Overview
 
 This dashboard covers the materials for the first follow-up course in R programming.  The course is held in Tbilisi, on October 19th to 21st 2021 . The course website of the introductory course can be found [here](https://annevinkel.github.io/RGeorgia/).
 
----
 Instructors: 
 
  - Anne Vinkel Hansen (aih@dst.dk)
  - Joen Petur Jacobsen (jpj@dst.dk)
 
 
----
 Part of the material for this course is adapted from [Gerko Vink](https://github.com/gerkovink/R), with gratitude
 
 
----
-# Quick Overview
 
 ## Column 1
 
@@ -69,13 +66,8 @@ The workshop on Thursday is a "free play" exercise, where you can work with your
 ## Column 1
 
 ### Preparing your machine for the course
-Dear all, 
 
 The below steps guide you through installing both `R` as well as the necessary additions.
-
-We look forward to see you all in Tbilisi,  
-
-*Anne and Joen*
 
 ### **System requirements**
 
@@ -109,7 +101,7 @@ install.packages(c("tidyverse", "micemd", "jomo", "pan",
 If you are not sure where to execute code, use the following figure to identify the console:
 
 <center>
-  <img src="console.png" alt="HTML5 Icon" width = 50%>
+  <img src="console.png" alt="HTML5 Icon" width = 90%>
 </center>
 
 Just copy and paste the installation command and press the return key. When asked 
@@ -121,6 +113,20 @@ compilation? (Yes/no/cancel)
 
 type `Yes` in the console and press the return key. 
 
+## Column 2
+
+### Preparing for Friday's workshop
+
+The purpose of the workshop is to work on your own data, possibly attempting to replicate previous work done in other software. 
+
+Please bring a dataset to work on, and make a plan for what analyses you want to do. 
+
+In order to ensure that we don't spend the workshop reading data into `R` (unless that is what you want to work on!), please make sure that you can read in the data beforehand. 
+
+Looking forward to seeing you in Tbilisi,
+
+**Joen and Anne**
+
 # Tuesday
 
 ## Column 1
@@ -130,16 +136,22 @@ We adapt the course as we go. To ensure that you work with the latest iteration 
 
 - Part A: Repetition
 
-    - [Lecture A](Contents/Material/Part A - Repetition and tidy data/Lecture_A.html){target="_blank"}
-    - [Practical A with solutions](Contents/Material/Part A - Repetition and tidy data/Practical_A_walkthrough.html){target="_blank"}
-    - [Impractical A](Contents/Material/Part A - Repetition/Practical_A.html){target="_blank"}
+    - [Lecture A]
+    <!-- (Contents/Material/Part A - Repetition and tidy data/Lecture_A.html){target="_blank"} -->
+    - [Practical A]
+    <!-- (Contents/Material/Part A - Repetition/Practical_A.html){target="_blank"} -->
+    - [Practical A with solutions]
+    <!-- (Contents/Material/Part A - Repetition and tidy data/Practical_A_walkthrough.html){target="_blank"} -->
 
 
 - Part B: Statistical Modeling
 
-    - [Lecture B](Contents/Material/Part B - modeling/Lecture_B.html){target="_blank"}
-    - [Practical B](Contents/Material/Part B - modeling/Practical_B.html){target="_blank"}
-    - [Practical B with solutions](Contents/Material/Part B - modeling/Practical_B_walkthrough.html){target="_blank"}
+    - [Lecture B]
+    <!-- (Contents/Material/Part B - modeling/Lecture_B.html){target="_blank"} -->
+    - [Practical B]
+    <!-- (Contents/Material/Part B - modeling/Practical_B.html){target="_blank"} -->
+    - [Practical B with solutions]
+    <!-- (Contents/Material/Part B - modeling/Practical_B_walkthrough.html){target="_blank"} -->
     
 All lectures are in `html` format. Practicals are exercies. The practicals with solutions are walkthrough files that guide you through the exercises.
 
@@ -158,9 +170,12 @@ All lectures are in `html` format. Practicals are exercies. The practicals with 
 We adapt the course as we go. To ensure that you work with the latest iteration of the course materials, we advice all course participants to access the materials online.
 
 - Part C: Data Validation and Editing
-    - [Lecture C](Contents/Material/Part C - Data validation/Lecture_C.html){target="_blank"}
-    - [Practical C with solutions](Contents/Material/Part C - Data validation/Practical_C_walkthrough.html){target="_blank"}
-    - [Practical C](Contents/Material/Part C - Data validation/Practical_C.html){target="_blank"}
+    - [Lecture C]
+    <!-- (Contents/Material/Part C - Data validation/Lecture_C.html){target="_blank"} -->
+    - [Practical C]
+    <!-- (Contents/Material/Part C - Data validation/Practical_C.html){target="_blank"} -->
+    - [Practical C with solutions]
+    <!-- (Contents/Material/Part C - Data validation/Practical_C_walkthrough.html){target="_blank"} -->
     - Data for the practical: [bands.txt](Contents/Material/Part C - Data validation/data/bands.txt){target="_blank"}, 
       [unnamed.xls](Contents/Material/Part C - Data validation/data/unnamed.xls){target="_blank"},
       [people.txt](Contents/Material/Part C - Data validation/data/people.txt),
@@ -170,9 +185,12 @@ We adapt the course as we go. To ensure that you work with the latest iteration 
 
 - Part D: Imputation
 
-    - [Lecture D](Contents/Material/Part D - Imputation/Lecture_D.html){target="_blank"}
-    - [Practical D with solutions](Contents/Material/Part D - Imputation/Practical_D_walkthrough.html){target="_blank"}
-    - [Practical D](Contents/Material/Part D - Imputation/Practical_D.html){target="_blank"}
+    - [Lecture D]
+    <!-- (Contents/Material/Part D - Imputation/Lecture_D.html){target="_blank"} -->
+    - [Practical D with solutions]
+    <!-- (Contents/Material/Part D - Imputation/Practical_D_walkthrough.html){target="_blank"} -->
+    - [Practical D]
+    <!-- (Contents/Material/Part D - Imputation/Practical_D.html){target="_blank"} -->
     
 All lectures are in `html` format. Practicals are exercies. The practicals with solutions are walkthrough files that guide you through the exercises.
 
