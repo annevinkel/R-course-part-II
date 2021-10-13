@@ -10,10 +10,10 @@ output:
     self_contained: TRUE   
 ---
 
-# The linear model
+# Statistical modeling in R
 ## This Lecture:
 
-- Linear models in R
+- Models in R - mainly the classic linear model, logistic regression in the practicals
 - Checking assuptions
 - Model fit & comparison
 - Predictions
@@ -27,6 +27,8 @@ library(Ecdat)    #for the Benefits data
 library(ggplot2)
 
 ```
+
+# The linear model
 
 ## The linear model
 
@@ -77,8 +79,7 @@ Assumptions:
 
 ## Continuous predictors
 To obtain a linear model with just main effects for `tenure` and `age`, we formulate $stateur\sim tenure + age$ 
-```{r}
-require(mice)
+```{r, message=FALSE}
 fit <- lm( stateur ~ tenure + age , data = Benefits)
 fit
 ```
@@ -86,6 +87,17 @@ fit
 ## Continuous predictors: more detail {.smaller}
 ```{r}
 fit %>% summary
+```
+
+
+## Components of the linear model {.smaller}
+```{r}
+names(fit) # the names of the list with output objects
+fit$coef  # show the estimated coefficients
+```
+
+```{r eval = FALSE}
+coef(fit) # alternative
 ```
 
 ## Continuous predictors: interaction effects
@@ -122,20 +134,6 @@ fit_c <- lm(stateur ~ joblost, data=Benefits)
 fit_c %>% summary
 ```
 
-## Components of the linear model {.smaller}
-```{r}
-names(fit_c) # the names of the list with output objects
-fit_c$coef  # show the estimated coefficients
-```
-
-```{r eval = FALSE}
-coef(fit_c) # alternative
-```
-
-
-
-
-
 # Checking assumptions
 ## Linearity {.smaller}
 ```{r eval = FALSE, message = FALSE}
@@ -147,6 +145,7 @@ Benefits %>%
 ```
 
 ## Linearity {.smaller}
+
 ```{r echo=FALSE, message = FALSE}
 Benefits %>%
   ggplot(aes(tenure, stateur)) + 
@@ -159,8 +158,7 @@ The loess curve suggests slight non-linearity
 
 ## Adding a squared term
 ```{r message=FALSE, warning = FALSE}
-lm(stateur ~ tenure + I(tenure^2), data=Benefits) %>%
-  summary()
+lm(stateur ~ tenure + I(tenure^2), data=Benefits) 
 ```
 
 ## Constant error variance? {.smaller}
@@ -179,12 +177,12 @@ fit %>%
 
 The QQplot shows divergence from normality at the tails
 
-## Histograms{.smaller}
-```{r}
-par(mfrow = c(1,2))
-hist(Benefits$age, main = "", xlab = "Age")
-hist(Benefits$tenure, main = " ", xlab = "Tenure")
-```
+<!-- ## Histograms{.smaller} -->
+<!-- ```{r} -->
+<!-- par(mfrow = c(1,2)) -->
+<!-- hist(Benefits$age, main = "", xlab = "Age") -->
+<!-- hist(Benefits$tenure, main = " ", xlab = "Tenure") -->
+<!-- ``` -->
 
 ## Outliers and influential cases {.smaller}
 ```{r, fig.height= 3, dev.args = list(bg = 'transparent')}
@@ -205,40 +203,40 @@ pred3 = c(pred1, 19.44);     outcome3 = c(outcome1, 20.8)
 pred4 = c(pred1, 30);        outcome4 = c(outcome1, 10)
 ```
 
-## Fine
-```{r echo=FALSE}
-par(mfrow = c(1,2))
-plot(outcome1 ~ pred1, ylim = c(9, 25), xlim = c(10, 30))
-abline(lm(outcome1 ~ pred1))
-plot(lm(outcome1 ~ pred1), which = 5)
-```
+<!-- ## Fine -->
+<!-- ```{r echo=FALSE} -->
+<!-- par(mfrow = c(1,2)) -->
+<!-- plot(outcome1 ~ pred1, ylim = c(9, 25), xlim = c(10, 30)) -->
+<!-- abline(lm(outcome1 ~ pred1)) -->
+<!-- plot(lm(outcome1 ~ pred1), which = 5) -->
+<!-- ``` -->
 
-## High leverage, low residual
-```{r echo=FALSE}
-par(mfrow = c(1,2))
-plot(outcome2 ~ pred2, ylim = c(9, 25), xlim = c(10, 30))
-points(30, 20.8, col = "red")
-abline(lm(outcome2 ~ pred2))
-plot(lm(outcome2 ~ pred2), which = 5)
-```
+<!-- ## High leverage, low residual -->
+<!-- ```{r echo=FALSE} -->
+<!-- par(mfrow = c(1,2)) -->
+<!-- plot(outcome2 ~ pred2, ylim = c(9, 25), xlim = c(10, 30)) -->
+<!-- points(30, 20.8, col = "red") -->
+<!-- abline(lm(outcome2 ~ pred2)) -->
+<!-- plot(lm(outcome2 ~ pred2), which = 5) -->
+<!-- ``` -->
 
-## Low leverage, high residual
-```{r echo=FALSE}
-par(mfrow = c(1,2))
-plot(outcome3 ~ pred3, ylim = c(9, 25), xlim = c(10, 30))
-abline(lm(outcome3 ~ pred3))
-points(19.44, 20.8, col = "red")
-plot(lm(outcome3 ~ pred3), which = 5)
-```
+<!-- ## Low leverage, high residual -->
+<!-- ```{r echo=FALSE} -->
+<!-- par(mfrow = c(1,2)) -->
+<!-- plot(outcome3 ~ pred3, ylim = c(9, 25), xlim = c(10, 30)) -->
+<!-- abline(lm(outcome3 ~ pred3)) -->
+<!-- points(19.44, 20.8, col = "red") -->
+<!-- plot(lm(outcome3 ~ pred3), which = 5) -->
+<!-- ``` -->
 
-## High leverage, high residual
-```{r echo=FALSE}
-par(mfrow = c(1,2))
-plot(outcome4 ~ pred4, ylim = c(9, 25), xlim = c(10, 30))
-points(30, 10, col = "red")
-abline(lm(outcome4 ~ pred4))
-plot(lm(outcome4 ~ pred4), which = 5)
-```
+<!-- ## High leverage, high residual -->
+<!-- ```{r echo=FALSE} -->
+<!-- par(mfrow = c(1,2)) -->
+<!-- plot(outcome4 ~ pred4, ylim = c(9, 25), xlim = c(10, 30)) -->
+<!-- points(30, 10, col = "red") -->
+<!-- abline(lm(outcome4 ~ pred4)) -->
+<!-- plot(lm(outcome4 ~ pred4), which = 5) -->
+<!-- ``` -->
 
 
 
@@ -302,5 +300,28 @@ predict(fit, interval = "prediction") %>% head()
 - `lme4::lmer`: linear mixed effect models
 - `lme4::glmer`: generalized linear mixed effect models
 - `lme4::nlmer`: non-linear mixed effect models
+
+## Honorary mention: broom
+
+If you want the output of regression models to be nice and tidy for further work, the `broom` package is your friend
+
+```{r}
+fit %>% broom::tidy()
+```
+
+
+## Honorary mention: broom
+\tiny
+```{r}
+fit %>% broom::glance()
+```
+
+
+## Honorary mention: broom
+\small
+```{r}
+fit %>% broom::augment()
+```
+
 
 # Practical

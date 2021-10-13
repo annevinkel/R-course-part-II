@@ -79,6 +79,18 @@ naniar::gg_miss_upset(nhanes)
 ```
 
 
+
+## Visualization
+```{r, message = FALSE, warning = FALSE}
+naniar::gg_miss_fct(x = nhanes, fct = age)
+```
+
+
+## Visualization
+```{r}
+visdat::vis_miss(nhanes, cluster= T)
+```
+
 # Imputation methods
 
 ## Specifying models in `simputation`
@@ -128,6 +140,9 @@ head(imp_2a)
 - `impute_multivariate()`: imputation based on EM-estimation of multivariate normal parameters, imputation based on iterative Random Forest estimates and stochastic imptuation based on bootstrapped EM-estimatin of multivariate normal parameters.
 - `impute_proxy()`: Impute missing values by a constant, by copying another variable, computing transformations from other variables.
 
+# Practical 
+
+# Extra slides
 
 ## Multivariate Imputation by Chained Equations (mice)
 
@@ -249,21 +264,6 @@ summary(pool.fit)
 - `Hmisc`
 - `Amelia`
 - `mix`
-
-# Practical 
-
-# Extra slides
-
-## Visualization
-```{r, message = FALSE, warning = FALSE}
-naniar::gg_miss_fct(x = nhanes, fct = age)
-```
-
-
-## Visualization
-```{r}
-visdat::vis_miss(nhanes)
-```
 
 
 ## Convergence
