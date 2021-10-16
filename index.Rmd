@@ -125,7 +125,7 @@ In order to ensure that we don't spend the workshop reading data into `R` (unles
 
 Looking forward to seeing you in Tbilisi,
 
-**Joen and Anne**
+**Joen Petur and Anne**
 
 # Tuesday
 
@@ -136,22 +136,17 @@ We adapt the course as we go. To ensure that you work with the latest iteration 
 
 - Part A: Repetition
 
-    - [Lecture A]
-    <!-- (Contents/Material/Part A - Repetition and tidy data/Lecture_A.html){target="_blank"} -->
-    - [Practical A]
-    <!-- (Contents/Material/Part A - Repetition/Practical_A.html){target="_blank"} -->
-    - [Practical A with solutions]
-    <!-- (Contents/Material/Part A - Repetition and tidy data/Practical_A_walkthrough.html){target="_blank"} -->
+    - [Lecture1 - Tidy data](Part A - Repetition/Tidy_data.html){target="_blank"}
+    - [Practical A](Part A - Repetition/Practical_A.html){target="_blank"}
+    - [Practical A with solutions](Part A - Repetition/Practical_A_walkthrough.html){target="_blank"}
+    - [Tidy data practical](Part A - Repetition/Practical.html){target="_blank"}
 
 
 - Part B: Statistical Modeling
 
-    - [Lecture B]
-    <!-- (Contents/Material/Part B - modeling/Lecture_B.html){target="_blank"} -->
-    - [Practical B]
-    <!-- (Contents/Material/Part B - modeling/Practical_B.html){target="_blank"} -->
-    - [Practical B with solutions]
-    <!-- (Contents/Material/Part B - modeling/Practical_B_walkthrough.html){target="_blank"} -->
+    - [Lecture B](Part B - modeling/Lecture_B.html){target="_blank"}
+    - [Practical B](Part B - modeling/Practical_B.html){target="_blank"}
+    - [Practical B with solutions](Part B - modeling/Practical_B_walkthrough.html){target="_blank"}
     
 All lectures are in `html` format. Practicals are exercies. The practicals with solutions are walkthrough files that guide you through the exercises.
 
@@ -159,6 +154,8 @@ All lectures are in `html` format. Practicals are exercies. The practicals with 
 
 ### Useful references
 - [Pipes in R](https://r4ds.had.co.nz/pipes.html)
+- [R for Data Science: 12 Tidy Data](https://r4ds.had.co.nz/tidy-data.html#spreading-and-gathering)  
+- [R Tidy data manifest](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html)
 - [Practical Regression with solutions and Anova using R](https://cran.r-project.org/doc/contrib/Faraway-PRA.pdf) by Julian Faraway  
 
 
@@ -170,27 +167,21 @@ All lectures are in `html` format. Practicals are exercies. The practicals with 
 We adapt the course as we go. To ensure that you work with the latest iteration of the course materials, we advice all course participants to access the materials online.
 
 - Part C: Data Validation and Editing
-    - [Lecture C]
-    <!-- (Contents/Material/Part C - Data validation/Lecture_C.html){target="_blank"} -->
-    - [Practical C]
-    <!-- (Contents/Material/Part C - Data validation/Practical_C.html){target="_blank"} -->
-    - [Practical C with solutions]
-    <!-- (Contents/Material/Part C - Data validation/Practical_C_walkthrough.html){target="_blank"} -->
-    - Data for the practical: [bands.txt](Contents/Material/Part C - Data validation/data/bands.txt){target="_blank"}, 
-      [unnamed.xls](Contents/Material/Part C - Data validation/data/unnamed.xls){target="_blank"},
-      [people.txt](Contents/Material/Part C - Data validation/data/people.txt),
-      [peoplerules.txt](Contents/Material/Part C - Data validation/data/peoplerules.txt),
-      [dirty_iris.txt](Contents/Material/Part C - Data validation/data/dirty_iris.txt)
+    - [Lecture C](Part C - Data validation/Lecture_C.html){target="_blank"}
+    - [Practical C](Part C - Data validation/Practical_C.html){target="_blank"}
+    - [Practical C with solutions](Part C - Data validation/Practical_C_walkthrough.html){target="_blank"}
+    - Data for the practical: [bands.txt](Part C - Data validation/data/bands.txt){target="_blank"}, 
+      [unnamed.xls](Part C - Data validation/data/unnamed.xls){target="_blank"},
+      [people.txt](Part C - Data validation/data/people.txt),
+      [peoplerules.txt](Part C - Data validation/data/peoplerules.txt),
+      [dirty_iris.txt](Part C - Data validation/data/dirty_iris.txt)
 
 
 - Part D: Imputation
 
-    - [Lecture D]
-    <!-- (Contents/Material/Part D - Imputation/Lecture_D.html){target="_blank"} -->
-    - [Practical D with solutions]
-    <!-- (Contents/Material/Part D - Imputation/Practical_D_walkthrough.html){target="_blank"} -->
-    - [Practical D]
-    <!-- (Contents/Material/Part D - Imputation/Practical_D.html){target="_blank"} -->
+    - [Lecture D](Part D - Imputation/Lecture_D.html){target="_blank"}
+    - [Practical D with solutions](Part D - Imputation/Practical_D_walkthrough.html){target="_blank"}
+    - [Practical D](Part D - Imputation/Practical_D.html){target="_blank"}
     
 All lectures are in `html` format. Practicals are exercies. The practicals with solutions are walkthrough files that guide you through the exercises.
 

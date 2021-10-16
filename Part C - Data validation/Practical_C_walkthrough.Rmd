@@ -1,5 +1,5 @@
 ---
-title: "Practical E"
+title: "Practical C"
 author: "Anne Vinkel, adapted from 'An Introduction to data cleaning with R' by Edwin de Jonge and  Mark van der Loo "
 date: "Statistical Programming with R"
 output: html_document

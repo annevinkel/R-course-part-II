@@ -1,0 +1,188 @@
+---
+title: "Practical tidy data"
+author: "JPJ"
+date: "15/10/2021"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+# Excercise
+
+```{r message=FALSE, warning=FALSE, echo=F}
+
+knitr::opts_chunk$set(message = F, results = F)
+
+```
+
+Inspiration from:  
+
+* [R for Data Science: 12 Tidy Data](https://r4ds.had.co.nz/tidy-data.html#spreading-and-gathering)  
+* [Tidy Data manifest](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html)  
+* [r-exercises.com](https://www.r-exercises.com/2017/10/26/how-to-tidy-up-your-data-set-with-tidyr/?__cf_chl_managed_tk__=pmd_dWFMOu7CQXalYXDA4JRMEHfPY6or_CrfK2i91oS_fIo-1634307577-0-gqNtZGzNAyWjcnBszQjR)  
+ 
+
+
+```{r class.source = 'fold-show', message=FALSE, warning=FALSE}
+
+library(tidyverse)
+```
+
+
+1. **Use the tool box from the tidy-data session to make the data.tables below tidy**
+
+1.a: **below is a table showing peoples age and height. Make the table tidy**
+```{r class.source = 'fold-show', message=FALSE}
+
+
+people <- tribble(
+  ~name,             ~names,  ~values,
+  "Phillip Woods",   "age",       45,
+  "Phillip Woods",   "height",   186,
+  "Jessica Cordero", "age",       37,
+  "Jessica Cordero", "height",   156
+)
+```
+**Hint** [press code to see the hint]{style="float:right"}
+```{r}
+#' Use pivot_wider
+```
+
+
+
+**Solution** [press code to see the hint]{style="float:right"}
+```{r}
+people %>% 
+  pivot_wider(names_from = names, values_from = values)
+```
+
+1.b: **below is a table showing pregnancies on gender. Make the table tidy**
+```{r class.source = 'fold-show', message=FALSE}
+preg <- tribble(
+  ~pregnant, ~male, ~female,
+  "yes", NA, 10,
+  "no", 20, 12
+)
+```
+
+
+**Hint**
+```{r}
+#' Use pivot_longer
+```
+
+**Solution**
+```{r}
+preg %>% 
+  pivot_longer(cols = c(male, female), names_to = "sex", values_to = "count")
+
+
+# alternativ solution
+preg %>% 
+  pivot_longer(c(male, female), names_to = "sex", values_to = "count", values_drop_na = TRUE)
+```
+
+
+
+1.c: **below is a table showing income groups on religious belief. Make the table tidy**
+```{r class.source = 'fold-show', results=T}
+relig_income
+```
+
+**Solution**
+```{r}
+relig_income %>% 
+  pivot_longer(cols = -religion,  names_to = "income", values_to = "frequency")
+```
+
+
+2. **Make sure that the data table billboard is tidy and compressed**
+```{r class.source = 'fold-show', results=T}
+billboard
+```
+
+
+**Hint**
+```{r}
+
+# Use pivot_longer for all weeks, compress the new variable from names_to and correct date.entered to first date of the week, call the new column 'date'. You should always find back to date.entered by taking min(date)
+```
+
+**Solution**
+```{r}
+
+billboard %>% 
+  pivot_longer(
+    wk1:wk76, 
+    names_to = "week", 
+    values_to = "rank", 
+    values_drop_na = TRUE
+  ) %>% 
+  mutate(
+    week = as.integer(str_remove(week, "wk")),
+    date = as.Date(date.entered) + 7 * (week - 1),
+    date.entered = NULL
+  )
+
+# Alternative solution
+
+billboard %>% 
+  pivot_longer(-c("artist", "track", "date.entered"),
+    names_to = "week", 
+    values_to = "rank", 
+    values_drop_na = TRUE
+  ) %>% 
+  mutate(
+    week = as.integer(str_remove(week, "wk")),
+    date = as.Date(date.entered) + 7 * (week - 1),
+    date.entered = NULL
+  )
+```
+
+
+3. **Tidy the data below and calculate the sum and mean of all the points scored that day**
+```{r class.source = 'fold-show'}
+nba <- data.frame(
+  player = c("James", "Durant", "Curry", "Harden", "Paul", "Wade"),
+  team = c("CLEOH", "GSWOAK", "GSWOAK", "HOUTX", "HOUTX", "CLEOH"),
+  day1points = c("25","23","30","41","26","20"),
+  day2points = c("24","25","33","45","26","23")
+)
+```
+
+**Hint1**
+```{r}
+
+#use pivot_longer on dayXpoints
+
+```
+
+**Hint2**
+```{r}
+
+# The first 3 character of the word is the team. The rest is the stat
+
+```
+
+**Solution (tidy)**
+```{r}
+
+nba_tidy <- nba %>% 
+  pivot_longer(cols = c(day1points, day2points), names_to = "day", values_to = "points") %>%
+  mutate(day = str_remove_all(day, "day|points") %>% as.numeric(),
+         points = as.numeric(points)) %>% 
+  separate(col = team, into = c("team", "state"), sep = 3) 
+
+```
+
+**Solution (with calculations)**
+```{r}
+
+nba_tidy %>% 
+  group_by(day) %>% 
+  summarise(total_points = sum(points),
+            mean_points = mean(points),
+            .groups = "drop")
+
+```
+

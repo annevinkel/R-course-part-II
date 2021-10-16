@@ -1,0 +1,360 @@
+```{r setup, include = F}
+
+library(knitr)
+library(tidyverse)
+
+knitr::opts_chunk$set(echo = F)
+
+```
+
+
+
+Tidy data
+========================================================
+author: Joen Petur Jacobsen
+date: `r Sys.Date()`
+autosize: true
+
+References 
+========================================================
+
+[R for Data Science: 12 Tidy Data](https://r4ds.had.co.nz/tidy-data.html#spreading-and-gathering)  
+[R Tidy data manifest](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html)
+
+  
+Intro
+========================================================
+
+
+**Quote** 
+- “Happy families are all alike; every unhappy family is unhappy in its own way.” –– Leo Tolstoy
+  <br>
+  <br> 
+
+**R Tidy data version**
+- “Tidy datasets are all alike, but every messy dataset is messy in its own way.” –– Hadley Wickham
+
+
+
+
+Manifest
+========================================================
+
+It is often said that 80% of data analysis is spent on the cleaning and preparing data.
+
+The principles of tidy data provide a standard way to organise data values within a dataset.
+
+
+**Messy data problems**
+- Column headers are values, not variable names.
+- Variables are stored in both rows and columns.
+- Multiple types of observational units are stored in the same table.
+- A single observational unit is stored in multiple tables.
+
+
+Rules
+========================================================
+
+There are three interrelated rules which make a dataset tidy:
+
+  1. Each variable must have its own column. 
+  2. Each observation must have its own row.
+  3. Each value must have its own cell.
+
+```{r, fig.align = "center" }
+include_graphics("Tidy data explanation.PNG")
+```
+
+
+Tidy data examples
+========================================================
+
+
+```{r}
+table1
+```
+
+- Each variable (country, year, cases and population) have its own column. 
+- Each observation must have its own row. ex. Afganistan in year 1999 had 745 cases of tb and a population of 19.987.081 inhabitans etc.
+- Each value must have its own cell.
+
+
+Tools to tidy data
+========================================================
+
+- Pivoting
+  - pivot_longer
+  - pivot_wider
+  
+- Separateing and uniting
+  - separate
+  - unite
+
+
+Untidy to tidy 1
+========================================================
+
+
+```{r}
+table2
+```
+
+- Untidy doesn't mean wrong. Table above is normal in many databases, but it is hard to analyze from.
+
+Untidy to tidy 1 (pivot_wider)
+========================================================
+
+
+```{r, echo = T}
+
+table2 %>% 
+    pivot_wider(names_from = "type", values_from = "count")
+
+```
+
+
+Untidy to tidy 2
+========================================================
+
+
+**Cases**
+```{r}
+table4a
+```
+
+**Population**
+```{r}
+table4b
+```
+
+Untidy to tidy 2 (pivot_wider)
+========================================================
+
+```{r, echo=T}
+table4a_tidy <- table4a %>%
+  pivot_longer(cols = c(`1999`, `2000`), names_to = "year", values_to = "cases")
+
+table4a_tidy
+
+```
+
+
+Untidy to tidy 2 (pivot_wider)
+========================================================
+```{r, echo=T}
+
+table4b_tidy <- table4b %>% 
+  pivot_longer(cols = c(`1999`, `2000`), names_to = "year", values_to = "population")
+
+table4b_tidy
+
+```
+
+Untidy to tidy 2 (pivot_wider)
+========================================================
+```{r, echo=T}
+
+table4a_tidy %>%
+  left_join(table4b_tidy,
+            by = c("country", "year"))
+
+```
+
+
+Untidy data example 3 
+========================================================
+
+```{r}
+
+table5
+
+```
+
+
+Untidy data example (separate)
+========================================================
+
+```{r, echo = T}
+
+table5_sep <- table5 %>% 
+ separate(col = "rate", into = c("cases", "population"))
+
+table5_sep
+```
+
+
+Untidy data example 4 
+========================================================
+
+```{r, echo = T}
+
+table5_sep %>% 
+  unite(col = "year", century, year, sep = "") 
+
+```
+
+
+Missing values 1
+========================================================
+```{r}
+stocks <- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+)
+
+stocks
+```
+
+- Should you make missing values explicit or implicit?
+
+Missing values 1 (complete)
+========================================================
+```{r}
+
+stocks %>% 
+  complete(year, qtr)
+
+```
+
+
+Missing values 2
+========================================================
+```{r}
+treatment <- tribble(
+  ~ person,           ~ treatment, ~response,
+  "Derrick Whitmore", 1,           7,
+  NA,                 2,           10,
+  NA,                 3,           9,
+  "Katherine Burke",  1,           4
+)
+
+treatment
+```
+
+- Typical data structur when you collect data from our statistical bank to Excel
+
+Missing values 2 (fill)
+========================================================
+```{r, echo=T}
+
+treatment %>% 
+  fill(person)
+
+```
+
+Real world problem (Messy data)
+========================================================
+
+```{r}
+
+who
+
+```
+
+Real world problem (Messy data)
+========================================================
+```{r, echo = T}
+who1 <- who %>% 
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65, 
+    names_to = "key", 
+    values_to = "cases", 
+    values_drop_na = TRUE
+  )
+who1
+```
+
+
+Real world problem (Messy data)
+========================================================
+Count on *key* to see all names
+```{r}
+who1 %>% 
+  count(key) %>% 
+  tail(17)
+```
+
+
+Real world problem (Messy data)
+========================================================
+```{r, echo = T}
+who2 <- who1 %>% 
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) 
+```
+
+
+Then count on *key* again
+```{r}
+who2 %>% 
+  count(key) %>% 
+  filter(row_number()>6) %>% 
+  print(n=13)
+```
+
+
+Real world problem (Messy data)
+========================================================
+```{r, echo=T}
+who3 <- who2 %>% 
+  separate(key, c("new", "type", "sexage"), sep = "_")
+
+who3
+```
+
+
+Real world problem (Messy data)
+========================================================
+```{r, echo=T}
+who3 <- who2 %>% 
+  separate(key, c("new", "type", "sexage"), sep = "_")
+
+who3
+```
+
+
+Real world problem (Messy data)
+========================================================
+```{r, echo=T}
+who4 <- who3 %>%
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex", "age"), sep = 1) 
+
+who4
+```
+
+
+
+Real world problem (Messy data)
+========================================================
+```{r, echo=T}
+
+who4 %>% 
+  mutate(age = if_else(age=="65", "65+", word(age, end = -3, sep = "") %>% str_c("-", str_remove(age, .)) )) 
+
+
+```
+
+
+
+Real world problem final (Messy data)
+========================================================
+```{r, echo=T, eval = F}
+
+who %>%
+  pivot_longer(
+    cols = new_sp_m014:newrel_f65, 
+    names_to = "key", 
+    values_to = "cases", 
+    values_drop_na = TRUE
+  ) %>% 
+  mutate(
+    key = stringr::str_replace(key, "newrel", "new_rel")
+  ) %>%
+  separate(key, c("new", "var", "sexage")) %>% 
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex", "age"), sep = 1) %>% 
+  mutate(age = if_else(age=="65", "65+", word(age, end = -3, sep = "") %>% str_c("-", str_remove(age, .)) )) 
+
+```
+
