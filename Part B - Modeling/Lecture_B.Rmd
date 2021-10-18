@@ -25,7 +25,7 @@ output:
 library(dplyr) 
 library(Ecdat)    #for the Benefits data
 library(ggplot2)
-
+library(broom)  # tidy conversion of analysis objects
 ```
 
 # The linear model
@@ -108,7 +108,7 @@ fit <- lm( stateur ~ tenure * age, data = Benefits)
 
 Equivalent
 ```{r eval = FALSE}
-fit <- Benefits %$% lm(stateur ~ tenure + age + tenure:age)
+fit <- lm(stateur ~ tenure + age + tenure:age, data = Benefits)
 ```
 
 ## Continuous predictors: interaction effects
@@ -119,6 +119,22 @@ fit
 ##  and with more detail {.smaller}
 ```{r}
 fit %>% summary
+```
+
+## Tidy model output with `broom`
+
+If you want the output of regression models to be nice and tidy for further work, the `broom` package is your friend
+
+```{r}
+fit %>% broom::tidy()
+```
+
+## Tidy model output with `broom`
+
+If you want the output of regression models to be nice and tidy for further work, the `broom` package is your friend
+
+```{r}
+fit %>% broom::glance()
 ```
 
 ## Categorical predictors in the linear model
@@ -266,19 +282,19 @@ summary(fit)$r.squared
 ```{r}
 summary(fit)$adj.r.squared
 ```
+Or `broom`ing: 
 
+```{r}
+glance(fit) %>% select(r.squared, adj.r.squared)
+```
 
 # Prediction
 
 ## Fitted values
+Again, `broom` is our friend - this time the `augment` function
+
 ```{r}
-y_hat <- 
-  fit %>%
-  fitted.values()
-```
-The residual is then calculated as
-```{r }
-(y_hat - Benefits$stateur)[1:12]
+augment(fit)
 ```
 
 ## Predict new values
@@ -293,6 +309,16 @@ predict.lm(fit, newdata = new.data)
 predict(fit, interval = "prediction") %>% head()
 ```
 
+## Predict new values
+
+Or, with `broom`
+```{r , warning=FALSE}
+augment(fit, newdata = new.data, interval = "prediction")
+```
+
+
+
+
 ## Some other modeling devices in `R`
 - `lm()`: linear modeling
 - `glm()`: generalized linear modeling
@@ -300,28 +326,5 @@ predict(fit, interval = "prediction") %>% head()
 - `lme4::lmer`: linear mixed effect models
 - `lme4::glmer`: generalized linear mixed effect models
 - `lme4::nlmer`: non-linear mixed effect models
-
-## Honorary mention: broom
-
-If you want the output of regression models to be nice and tidy for further work, the `broom` package is your friend
-
-```{r}
-fit %>% broom::tidy()
-```
-
-
-## Honorary mention: broom
-\tiny
-```{r}
-fit %>% broom::glance()
-```
-
-
-## Honorary mention: broom
-\small
-```{r}
-fit %>% broom::augment()
-```
-
 
 # Practical

@@ -28,6 +28,7 @@ library(ggplot2)
 library(DAAG)
 library(MASS)
 library(broom)
+library(tidyr)
 ```
 These exercises deal with modeling data in `R`. We will explore the workhorse `lm` function for linear modeling as well as a robust regression function found in the `MASS` package and the `glm` function for generalized linear models (including logistic regression). You will see that the interface to modeling is very similar across packages. Model output can be less similar, something which the `broom` package attempts to remedy. 
 
@@ -182,18 +183,19 @@ in the ordinary `lm()` regression.
 5. **Use the `elastic2` variable `stretch` to obtain predictions on the model fitted on `elastic1`.**
 
 ```{r}
-pred <- predict.lm(fit1, newdata = data.frame(stretch = elastic2$stretch))
+pred <- augment(fit1, newdata = elastic2)
+pred
 ```
 
 ---
 
 6. **Now make a scatterplot to investigate similarity between plot the predicted values against the observed values for `elastic2`**
 ```{r}
-new.dat <- bind_rows( "original" = elastic2 %>% select(stretch, distance),
-                      "predicted" = bind_cols( stretch=elastic2$stretch, distance = pred)
-                    , .id = "source")
-
-new.dat %>%
+pred %>%
+  rename( observed = distance, fitted = .fitted) %>% 
+  pivot_longer(cols = c( observed, fitted), 
+               names_to = "source",
+               values_to = "distance") %>% 
   ggplot(aes(stretch, distance, colour = source)) +
   geom_point() + 
   geom_smooth(method = "lm")
@@ -201,8 +203,8 @@ new.dat %>%
 
 The predicted values are very similar to the observed values:
 ```{r}
-bind_cols(distance = elastic2$distance, predicted = pred) %>%
-  ggplot(aes(distance, predicted)) + 
+pred %>% 
+  ggplot(aes(distance, .fitted)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1)
   
