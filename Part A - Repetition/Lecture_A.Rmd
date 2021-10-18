@@ -135,6 +135,24 @@ D[,2]
 ```
 
 
+## Functions
+```{r, warning=F, message=F}
+
+addition <- function(x, y){
+z <-   x + y
+return(z)
+}
+addition(2,5)
+
+in_vector_check <- function(x, y){
+z <-   x %in% y
+return(z)
+}
+in_vector_check(4, c(1,2,4,5,6))
+
+
+```
+
 ## Pipes and the tidyverse
 
 The tidyverse is a collection of packages that "share an underlying design philosophy, grammar, and data structures". They make for easier data handling and visualization. 
@@ -143,9 +161,10 @@ The pipe %>% allows for chained method calls that make code much more readable
 ```{r, results="hide", message = F}
 library(dplyr)
 starwars %>%
-  subset( species == "Human" ) %>%
+  filter( species == "Human" ) %>%
   group_by( homeworld ) %>% 
-  summarise( n = n(), mean.height = mean(height))
+  summarise( n = n(), mean_height = mean(height),
+             .groups = "drop")
 ```
 
 ## Plotting {.smaller}
@@ -161,4 +180,11 @@ library(ggplot2)
 starwars %>% ggplot( aes( x = height)) + geom_histogram()
 ```
 
+## map
+```{r, warning=F, message=F}
+library(purrr)
+
+map2(c(1,2,3,4), c(5,6,7,8), ~addition(.x, .y))
+
+```
 # Practical
