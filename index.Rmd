@@ -145,9 +145,9 @@ We adapt the course as we go. To ensure that you work with the latest iteration 
 
 - Part B: Statistical Modeling
 
-    - [Lecture B](Part B - modeling/Lecture_B.html){target="_blank"}
-    - [Practical B](Part B - modeling/Practical_B.html){target="_blank"}
-    - [Practical B with solutions](Part B - modeling/Practical_B_walkthrough.html){target="_blank"}
+    - [Lecture B](Part_B_Modeling/Lecture_B.html){target="_blank"}
+    - [Practical B](Part_B_Modeling/Practical_B.html){target="_blank"}
+    - [Practical B with solutions](Part_B_Modeling/Practical_B_walkthrough.html){target="_blank"}
     
 All lectures are in `html` format. Practicals are exercies. The practicals with solutions are walkthrough files that guide you through the exercises.
 
