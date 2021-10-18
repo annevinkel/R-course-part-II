@@ -136,7 +136,8 @@ We adapt the course as we go. To ensure that you work with the latest iteration 
 
 - Part A: Repetition
 
-    - [Lecture1 - Tidy data](Part A - Repetition/Tidy_data.html){target="_blank"}
+    - [Lecture A - Repetition](Part A - Repetition/Lecture_A.html){target="_blank"}
+    - [Lecture A1 - Tidy data](Part A - Repetition/Tidy_data.html){target="_blank"}
     - [Practical A](Part A - Repetition/Practical_A.html){target="_blank"}
     - [Practical A with solutions](Part A - Repetition/Practical_A_walkthrough.html){target="_blank"}
     - [Tidy data practical](Part A - Repetition/Practical.html){target="_blank"}
