@@ -9,6 +9,72 @@ output:
     transition: 0
     self_contained: TRUE   
 ---
+# Working with distributions in `R`
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+## Sampling from distributions:
+
+In R we can use:
+
+- `rnorm()` to obtain samples from a normal distribution
+- `dnorm()` to sample from a normal density function
+- `pnorm()` to sample from a normal distribution function
+- `qnorm()` to sample from a normal quantile function
+
+This works for other distributions as well, e.g. `rexp()`, `dexp()`, `pexp()` and `qexp()`.
+
+## Setting a seed
+
+```{r}
+set.seed (101)
+rnorm(5, 2, 5)
+rnorm(5, 2, 5)
+
+set.seed(101)
+rnorm(5, 2, 5)
+```
+
+## Histograms
+
+```{r echo=FALSE, fig.height=4}
+set.seed(101)
+tibble( x = rnorm(1000, 3, 0.5)) %>% 
+  ggplot(aes( x = x))+
+  geom_histogram( aes( y = ..density..)) + 
+  geom_density( col = "red", size = 1) +
+  ggtitle("Histogram of rnorm(1000,3,0.5")
+
+```
+
+## Code for previous plot
+
+```{r, eval = FALSE, fig.height=4}
+set.seed(101)
+tibble( x = rnorm(1000, 3, 0.5)) %>% 
+  ggplot(aes( x = x))+
+  geom_histogram( aes( y = ..density..)) + 
+  geom_density( col = "red", size = 1) +
+  ggtitle("Histogram of rnorm(1000,3,0.5")
+```
+
+## Plotting distributions
+
+Using `ggplot` with the `geom_function` geometry
+
+```{r fig.height=3}
+library(ggplot2)
+ggplot() + xlim(c(-3,3)) + geom_function( fun = dnorm)
+```
+
+## Plotting distributions
+
+Using `ggplot` with the `geom_function` geometry
+
+```{r fig.height=3}
+ggplot() + xlim(c(-3,3)) + geom_function( fun = pnorm)
+```
 
 # Imputation
 
@@ -17,21 +83,14 @@ output:
 - Missing data patterns
 - Imputation methods
   * `simputation` package
-  * `mice` package
 
 ## I use the following packages in this lecture
 
 ```{r message = FALSE}
 
-library(mice) # for visualisation & pmm
-library(VIM) # visualisation & several hotdeck imputation methods 
-#(fast implementation)
-library(simputation) # common interface for several imputation methods
-library(magrittr) # for pipe operator
 library(naniar) # additional package for practical
-library(visdat) # visualisation of datasets
-library(UpSetR) # Upset plots
-library(ggplot2) # plots
+library(simputation) # common interface for several imputation methods
+library(tidyverse) 
 
 ```
 
@@ -48,36 +107,44 @@ library(ggplot2) # plots
 `chl`: Total serum cholesterol (mg/dL)
 
 ```{r}
+nhanes <- mice::nhanes
+
 head(nhanes, n = 10)
 ```
 
 
-## Visualise missing data pattern {.smaller}
+## Exploring missingness patterns
+
+First, a basic dplyr approach:
+```{r}
+nhanes %>% is.na() %>% colSums()
+```
+## Exploring missingness patterns
+
+Two packages worth mentioning: `VIM` and `naniar` - we will work mainly with `naniar`
 
 ```{r}
-
-VIM::aggr(nhanes, col=c('blue','red'), numbers = TRUE, sortVars = TRUE,
-                  labels = names(nhanes), cex.axis = .8, gap = 3, 
-                  ylab = c("Histogram of missing data", "Red is Missing Data"))
-
+miss_var_summary(nhanes)
 ```
 
+## Visualise missing data pattern
 
-## 
 ```{r}
-pattern <- mice::md.pattern(nhanes)
+naniar::gg_miss_var(nhanes, show_pct = TRUE)
 ```
 
-##
-```{r}
-pattern
-```
+## Visualise missing data pattern
 
-##
 ```{r}
 naniar::gg_miss_upset(nhanes)
 ```
 
+## Visualise missing data pattern by factor variable
+
+```{r}
+nhanes %>% mutate( age = factor(age)) %>%
+  gg_miss_fct(fct = age)
+```
 
 
 ## Visualization
@@ -88,7 +155,7 @@ naniar::gg_miss_fct(x = nhanes, fct = age)
 
 ## Visualization
 ```{r}
-visdat::vis_miss(nhanes, cluster= T)
+vis_miss(nhanes, cluster= T)
 ```
 
 # Imputation methods
@@ -119,7 +186,7 @@ head(nhanes)
 ## Median imputation
 
 ```{r}
-imp_2 <- simputation::impute_median(imp_1, bmi ~ age)
+imp_2 <- impute_median(imp_1, bmi ~ age)
 head(imp_2)
 ```
 
@@ -128,8 +195,8 @@ head(imp_2)
 ```{r}
 
 imp_2a <- nhanes %>%
-          simputation::impute_lm(bmi ~ age + hyp + chl) %>%
-          simputation::impute_median(bmi ~ age)
+          impute_lm(bmi ~ age + hyp + chl) %>%
+          impute_median(bmi ~ age)
 head(imp_2a)
 ```
 
@@ -141,139 +208,3 @@ head(imp_2a)
 - `impute_proxy()`: Impute missing values by a constant, by copying another variable, computing transformations from other variables.
 
 # Practical 
-
-# Extra slides
-
-## Multivariate Imputation by Chained Equations (mice)
-
-Default imputation
-
-```{r}
-imp <- mice(nhanes, print = FALSE)
-```
-
-Defaults:
-
-  - pmm, predictive mean matching (numeric data)
-  - logreg, logistic regression imputation (binary data, factor with 2 levels)
-  - polyreg, polytomous regression imputation (unordered cateogrical data, factor > 2 levels)
-  - polr, proportional odds model (ordered data, factor > 2 levels)
-
-## Check imputations
-
-```{r}
-stripplot(imp, chl, pch = 19, xlab = "Imputation number")
-```
-
-## Vary number of imputations
-
-Just 4 imputed datasets instead of the default (5)
-
-```{r}
-imp <- mice(nhanes, m = 4, print = F)
-```
-
-## Predictor matrix
-
-```{r}
-imp$pred
-```
-
-1 = column used to impute row
-
-## Initial predictor matrix
-
-```{r}
-ini <- mice(nhanes, maxit = 0, print = F)
-pred <- ini$pred
-pred
-```
-
-
-## Change predictor matrix 
-
-We do not use `hyp` to impute any other variables
-
-```{r}
-pred[ ,"hyp"] <- 0
-pred
-imp <- mice(nhanes, m = 4, init = pred, print = F)
-```
-
-
-## Changing imputation methods
-
-```{r}
-imp$meth
-str(nhanes)
-```
-
-##
-
-```{r}
-str(nhanes2)
-imp <- mice(nhanes2, m = 4, init = pred, print = F, seed = 101)
-imp$meth
-```
-
-## Available methods {.smaller}
-
-```{r, warning = FALSE, message = FALSE}
-methods(mice)
-```
-
-## Extracting imputed data
-
-The 3rd imputed dataset
-```{r}
-c3 <- complete(imp, 3) 
-md.pattern(c3, plot = FALSE)
-```
-
-## {.smaller}
-All imputed datasets in long format
-
-```{r}
-complete(imp, "long")
-```
-
-
-## Pooling analyses {.smaller}
-
-```{r}
-fit <- with(imp, lm(bmi ~ chl))
-fit
-```
-
-##
-
-```{r}
-summary(fit$analyses[[2]])
-```
-
-##
-
-```{r}
-pool.fit <- pool(fit)
-summary(pool.fit)
-```
-
-## Other packages for imputation
-
-- `mi`
-- `Hmisc`
-- `Amelia`
-- `mix`
-
-
-## Convergence
-
-```{r}
-plot(imp)
-```
-
-## Seed values
-
-```{r}
-imp <- mice(nhanes, m = 4, init = pred, print = F, seed = 101)
-```

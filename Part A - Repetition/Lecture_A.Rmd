@@ -188,3 +188,7 @@ map2(c(1,2,3,4), c(5,6,7,8), ~addition(.x, .y))
 
 ```
 # Practical
+
+## Course webpage
+
+annevinkel.github.io/R-course-part-II/
