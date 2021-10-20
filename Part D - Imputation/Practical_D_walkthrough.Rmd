@@ -18,22 +18,18 @@ The purpose of this practical is to use some of R's packages to solve a missing 
 Suggested packages:
 
 ```{r message = FALSE}
-
-library(mice) # for visualisation & pmm
-library(VIM) # visualisation & several hotdeck imputation methods (fast implementation)
-library(simputation) # common interface for several imputation methods
-library(magrittr) # for pipe operator
-library(dplyr)
 library(naniar) # additional package for practical
-library(visdat) # visualisation of datasets
-library(UpSetR) # Upset plots
-library(ggplot2) # plots
-
+library(simputation) # common interface for several imputation methods
+library(tidyverse)
 ```
+**Note that:** A potential issue is that some of the functions in `simputation` and `naniar` have the same names - e.g. `impute_median`. This means that the order in which the packages are loaded matters - the last loaded package masks the functions from the former package. To specify which package you mean, call `simputation::impute_median` and `naniar::impute_median`
 
 ---
 
 #### Selfreport data
+```{r}
+selfreport <- mice::selfreport
+```
 
 ---
 
@@ -66,12 +62,15 @@ summary(selfreport)
 The measures weight and height variables are indeed missing from the `mgg` study
 
 ```{r}
-VIM::aggr(selfreport, col=c('blue','red'), numbers=TRUE, sortVars=TRUE,
-                  labels=names(selfreport), cex.axis=.8, gap=3, 
-                  ylab=c("Histogram of missing data", "Red is Missing Data"))
+gg_miss_fct(selfreport, src)
+gg_miss_var(selfreport, show_pct = TRUE)
 ```
 
 Apart from measured height and weight also the measured bmi, the indicators for pregnancy, educational level and ethnicity contain missing values.
+
+```{r}
+gg_miss_upset(selfreport, nsets = 15)
+```
 
 ---
 
@@ -87,6 +86,8 @@ calibration <- selfreport %>%
                                 bm < br ~ "higher",
                                 bm == br ~ "same"))
 
+calibration %>% count(difference)
+
 ggplot(calibration, aes(br, bm, color = difference)) +
   geom_point() +
   theme_minimal() +
@@ -95,11 +96,9 @@ ggplot(calibration, aes(br, bm, color = difference)) +
 
 ```
 
-
-
 ---
 
-3. **Impute missing data.**
+3. **Impute missing data using the simputation package - try, for instance impute_rf**
 
 First define a deterministic function to compute bmi:
 
@@ -109,44 +108,58 @@ bmi <- function(h, w) {
 }
 ```
 
-Define the imputation methods to use (we only impute `wm`, `hm` and `bm`). Make
-sure to define the deterministic relation between height, weight and bmi for the
-computation (not imputation) of bmi.
+One approach could be `impute_rf` which implements a random forest to do the imputation
 
-```{r}
-meth <- c(rep("", 5), "pmm", "pmm", rep("", 6), "~bmi(hm,wm)", "")
-```
+```{r, message=FALSE}
+# Impute prg
+selfreport %>% count(sex, prg)
 
-Get predictor matrix:
-```{r, warning = FALSE, message = FALSE}
-init <- mice(selfreport, maxit = 0) #get initial predictor matrix
-pred <- init$pred #note that pregnancy is not imputed by default because it contains too many missings
-pred[, c("src", "id", "pop", "prg", "edu", "etn", "web", "bm", "br")] <- 0 #set variables not used as predictors to 0
-```
+# We assume that missingness of prg implies "not pregnant"
+selfreport <- selfreport %>%
+  mutate( prg = replace_na( as.character(prg), "not pregnant")
+        , prg = as.factor(prg)) %>% 
+  # The factor etn has missing levels that will cause trouble
+  mutate( etn = droplevels(etn))
 
-Impute:
-```{r, results = FALSE}
-imp <- mice(selfreport, pred = pred, meth = meth, seed = 66573, maxit = 20, m = 10)
+# First impute measured height and weight
+library(randomForest)
+selfreport_imp_rf <- impute_rf( selfreport,
+                                formula = hm + wm ~ hr + wr + web  + src
+                                              + age + sex + prg)
+
+# Compute imputed bmi from imputed height and weight
+selfreport_imp_rf <- selfreport_imp_rf %>%
+  mutate( bm = bmi(hm,wm))
+head(selfreport)
+head(selfreport_imp_rf)
+
+# Impute edu and eth
+selfreport_imp_rf <- impute_rf( selfreport_imp_rf,
+                                formula = edu + etn ~ hr + wr + hm + wm + bm + br
+                                          + web + src + age + sex + prg)
+
+tail(selfreport)
+tail(selfreport_imp_rf)
+
+any_miss(selfreport_imp_rf)
 ```
 
 
 ---
 
-4. **What is the estimated prevalence (selfreported and imputed data) of obesity for different `age` and `sex` in the *survey dataset*?**
+4. **What is the estimated prevalence (selfreported and imputed data) of obesity (defined as a measured bmi of 32 or above) for different `age` and `sex` in the *survey dataset*?**
 
 Estimated prevalence in the selfreported data
 
 ```{r}
 
-reported <- as.tbl(selfreport)
-
-reported %>% 
-  filter(as.numeric(src) == 2) %>% 
-  mutate(br = bmi(hr, wr)) %>%
+selfreport_imp_rf %>% 
+  filter( src == "krul") %>%
+  mutate(bm = bmi(hm, wm)) %>%
   mutate(obese = case_when(br > 32 ~ 1,
                            TRUE ~ 0)) %>% 
   mutate(age_cat = cut(age, c(17, 29, 39, 49, 59, 75))) %>% 
-  group_by(sex, age_cat) %>% 
+  group_by(src, sex, age_cat) %>% 
   summarise(N = n(), prevalence = sum(obese)/N*100)
 
 ```
@@ -154,16 +167,14 @@ reported %>%
 Estimated prevalence in the imputed data
 
 ```{r}
-
-imputed <- as.tbl(complete(imp, action = "long"))
-
-imputed %>% 
-  filter(as.numeric(src) == 2) %>% 
-  mutate(obese = case_when(bm > 32 ~ 1,
+selfreport_imp_rf %>% 
+  filter(src=="mgg") %>% 
+  mutate(bm = bmi(hm, wm)) %>%
+  mutate(obese = case_when(br > 32 ~ 1,
                            TRUE ~ 0)) %>% 
   mutate(age_cat = cut(age, c(17, 29, 39, 49, 59, 75))) %>% 
-  group_by(sex, age_cat) %>% 
-  summarise(N = n()/10, prevalence = sum(obese)/(N*10)*100)
+  group_by(src, sex, age_cat) %>% 
+  summarise(N = n(), prevalence = sum(obese)/N*100)
 
 ```
 
