@@ -1,6 +1,6 @@
 ---
 title: "Practical D"
-author: "Jolien Cremers"
+author: "Jolien Cremers + Anne Vinkel"
 date: "Statistical Programming with R"
 output: html_document
 ---

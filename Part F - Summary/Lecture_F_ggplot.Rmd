@@ -1,0 +1,428 @@
+---
+title: "Producing plots with `ggplot2`"
+author: "Anne Vinkel"
+date: "Statistical Programming with R"
+output:
+  ioslides_presentation:
+    css: css/style.css
+    logo: css/logo_en.png
+    transition: 0
+    self_contained: TRUE   
+---
+
+## Packages used
+
+```{r, message=FALSE}
+library(ggplot2)
+library(mice) # for the boys dataset
+library(tidyverse)
+library(gridExtra) # to combine plots
+```
+
+
+# Background
+
+## GGplot2
+
+The `ggplot2` package by Hadley Wickham
+
+ - produces layered statistical figures.
+
+ - uses a “grammar” to build figures component-by-component
+ 
+ - less immediately approachable than base `R` plots but much easier to customize
+ 
+ - a part of the tidyverse
+ 
+## Documentation 
+
+https://ggplot2.tidyverse.org/reference/ is the officil homepage with help files and examples
+
+The book  *ggplot2: Elegant Graphics for Data Analysis* by Hadley Wickham is a thorough and concise explanation, and is now available online: https://ggplot2-book.org/index.html
+
+# The Grammar of Graphics
+
+## The Grammar of Graphics
+
+A concept by Leland Wilkinson (2005):
+
+ - A grammar of a language defines the rules of structuring words and phrases into meaningful expressions
+
+ - A grammar of graphics defines the rules of structuring mathematic and aesthetic elements into a meaningful graph
+
+## Components of a ggplot 
+
+- **Data**: which will be displayed on the plot
+- **Aesthetic mappings**: How is data mapped to color, size, shape, location...
+- **Geometries**: points, lines, shapes...
+- **Stats**: stastical transformations - binning, smoothing, quantiles...
+- **Scales**: Scales of aesthetic mappings (e.g. Danish=blue, Georgian=red)
+- **Coordinate systems**: the plane on which data are mapped on the graphic.
+- **Facets**: how should data be split into panels
+
+# Construction of a ggplot
+
+## Construction of a ggplot
+
+Plots are built up in layers, generally in this order:
+
+- Specify the data 
+- Map variables to aesthetics
+- Specify a plot
+- Overlay summaries
+- Add metadata, annotations
+
+Data must be a dataframe (or tibble). Multiple dataframes can be plotted in the same ggplot
+
+
+## Example - the `boys` data: scatterplot
+
+Specify the data 
+```{r, eval=FALSE}
+ggplot(boys)
+```
+
+Map variables to aesthetics
+```{r, eval=FALSE}
+ggplot(boys, aes(x = age, y = bmi))
+```
+
+Specify a plot
+```{r, eval=FALSE}
+ggplot(boys, aes(x = age, y = bmi)) +  geom_point()
+```
+
+## An example: scatterplot
+```{r, echo=FALSE, fig.align='center', message=F, warning=F}
+boys %>%
+  filter(!is.na(age) & !is.na(bmi)) %>% 
+  ggplot(aes(x = age, y = bmi)) +
+  geom_point() 
+```
+
+## Layers
+New layers can be added to the plot
+```{r, eval=F}
+boys %>%
+  filter(!is.na(age) & !is.na(bmi)) %>% 
+  ggplot(aes(x = age, y = bmi)) +
+  geom_point() +
+  geom_smooth()
+```
+
+## Layers
+```{r, echo=F, message=F}
+boys %>%
+  filter(!is.na(age) & !is.na(bmi)) %>% 
+  ggplot(aes(x = age, y = bmi)) +
+  geom_point() +
+  geom_smooth()
+```
+
+
+## Aesthetics
+
+- x
+- y
+- size
+- colour
+- fill
+- opacity (alpha)
+- linetype
+- ...
+
+## Aesthetics
+```{r, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
+gg <- 
+  boys %>% 
+  filter(!is.na(reg)) %>% 
+  
+  ggplot(aes(x      = age, 
+             y      = bmi, 
+             size   = hc, 
+             colour = reg)) +
+  
+  geom_point(alpha = 0.5) +
+  
+  labs(title  = "BMI trend for boys",
+       x      = "Age", 
+       y      = "BMI", 
+       size   = "Head circumference",
+       colour = "Region") +
+  theme_minimal()
+```
+ 
+## Aesthetics
+```{r, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
+plot(gg)
+```
+
+## Aesthetics
+
+Default aesthetics are shared by all layers of the plot. You can do layer-specific aesthetics:
+
+```{r, eval=F}
+boys %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( aes( col = reg )) + 
+  geom_smooth()
+```
+
+
+## Aesthetics
+
+```{r, echo=F}
+boys %>% filter(!is.na(age) & !is.na(bmi) & !is.na(reg)) %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( aes( col = reg )) + 
+  geom_smooth()
+```
+
+## Mapping vs. setting aesthetics
+
+**Map** variables to aesthetics *inside* the `aes` function, and the aesthetic varies with the variable. 
+
+**Set** aesthetics to some constant level *outside* the aes function
+
+```{r, eval=F}
+boys %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( aes( col = reg )) + 
+  geom_smooth( col = "green")
+```
+
+## Geometries
+
+Geometries are defined in part by which aesthetics they allow and require. You can find information on this in the help file for each geometry
+
+- geom_point
+- geom_bar
+- geom_line
+- geom_smooth
+
+- geom_histogram
+- geom_boxplot
+- geom_density
+
+## Geoms: Bar
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
+data.frame(x = letters[1:5], y = c(1, 3, 3, 2, 1)) %>% 
+  ggplot(aes(x = x, y = y)) + 
+  geom_bar(fill = "dark green", stat = "identity") +
+  labs(title = "Value per letter",
+       x     = "Letter", 
+       y     = "Value") +
+  theme_minimal()
+```
+
+## Geoms: Line
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
+ggdat <- data.frame(x = 1:100, y = rnorm(100))
+ggdat %>% 
+  ggplot(aes(x = x, y = y)) + 
+  geom_line(colour = "dark green", lwd = 1) +
+  ylim(-2, 3.5) +
+  labs(title = "Some line thing",
+       x     = "Time since start", 
+       y     = "Some value") +
+  theme_minimal()
+```
+
+## Geoms: Smooth
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
+ggdat %>% 
+  ggplot(aes(x = x, y = y)) + 
+  geom_smooth(colour = "dark green", lwd = 1, se = FALSE) +
+  ylim(-2, 3.5) +
+  labs(title = "Some line thing",
+       x     = "Time since start", 
+       y     = "Some value") +
+  theme_minimal()
+```
+
+## Geoms: Boxplot
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
+boys %>% 
+  filter(!is.na(reg)) %>% 
+  
+  ggplot(aes(x = reg, y = bmi, fill = reg)) +
+  
+  geom_boxplot() +
+  
+  labs(title = "BMI across regions",
+       x     = "Region", 
+       y     = "BMI") +
+  theme_minimal() + 
+  theme(legend.position = "none")
+```
+
+## Stats
+
+Stat functions transform data, for example:
+
+- frequencies of values of a variable (histogram, bar graphs)
+- a mean
+- a confidence limit
+
+Each stat function has a default geom, so no geom is required for shapes to be rendered. The geom may be respecfied in the stat for different shapes.
+
+## Stats
+
+- `stat_bin` bins the data and by default produces a histogram
+- `stat_summary` summarises y at each x (with a mean + se if nothing else is specified) and by default produces a pointrange-plot
+- `stat_qq` produces quantile-quantile plots
+- ...
+
+## Stats
+
+```{r, eval = F}
+ageplot <- boys %>% 
+  ggplot( aes( x = age)) +
+  stat_bin()
+
+ageplot2 <- boys %>% 
+  ggplot( aes( x = age)) +
+  stat_bin( geom = "line")
+
+grid.arrange( ageplot, ageplot, ncol=2)
+```
+
+
+## Scales
+
+Scales define which aesthetic values are mapped to data values - eg. if region is mapped to colour, which colour values are used for each region?
+
+`scale_`-functions allow us to control the scales
+
+```{r, eval=F}
+boys %>%
+  ggplot( aes(x = age, y = bmi, shape = reg )) +
+  geom_point( ) +
+  scale_shape_manual( values = c(5,3,8,13,20))
+```
+
+## Scales
+
+```{r, echo=F, warning=F}
+boys %>%
+  ggplot( aes(x = age, y = bmi, shape = reg )) +
+  geom_point( ) +
+  scale_shape_manual( values = c(5,3,8,13,20))
+```
+
+## Colour scale functions
+
+Colour is used a lot, and can be controlled with `scale_col_*`- functions and `scale_fill_*`-functions. For example:
+
+- `scale_fill_hue()`: evenly spaced hues
+- `scale_fill_brewer()`: sequential, diverging or qualitative colour schemes, originally intended to display factor levels on a map.
+- `scale_fill_viridis_*`: colour maps that are colourblind-friendly and perceptually uniform in both colour and black-and-white
+
+
+## Colour scale functions
+
+```{r, eval=F}
+dens <- boys %>% 
+  mutate( agegrp = case_when( age < 10 ~ "<10",
+                              age < 15 ~ "10-14",
+                              age >= 15 ~ "15+")) %>%
+  ggplot(aes(x=hgt, fill = agegrp))+
+  geom_density( alpha=1/3)
+
+grid.arrange( dens, dens + scale_fill_hue(), ncol=2)
+```
+
+## Colour scales
+```{r, echo=F, warning=F, message=F}
+dens <- boys %>% 
+  mutate( agegrp = case_when( age < 10 ~ "<10",
+                              age < 15 ~ "10-14",
+                              age >= 15 ~ "15+")) %>%
+  ggplot(aes(x=hgt, fill = agegrp))+
+  geom_density( alpha=1/3)
+
+grid.arrange( dens, dens + scale_fill_viridis_d(), ncol=2)
+```
+
+## Guides
+
+Guides (axes and legends) visualise a scale 
+- The x-axis visualises the mapping of data values to points on the x-axis
+- The legend tells us which values map to which colours
+
+Guides are displayed by default and can be manipulated with the `guides`-functions. (Eg. `guides(colour="none")` to remove colour-legend)
+
+## Coordinate systems
+
+Nearly always default cartesian, but can be (eg) polar, flipped cartesian, map projections...
+
+## Faceting
+
+Split plots into panels using `facet_wrap` and `facet_grid`
+
+```{r, eval = F}
+boys %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( ) + 
+  geom_smooth() + 
+  facet_wrap( ~ reg)
+```
+
+## Faceting
+
+```{r, echo = F, warning=FALSE, message=FALSE}
+boys %>%
+  filter( !is.na(age) & !is.na(bmi)) %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( ) + 
+  geom_smooth() + 
+  facet_wrap( ~ reg)
+```
+
+## Themes
+
+Themes control the elements of the graph not related to the data
+
+- Background colour
+- Font and font size
+- Gridlines
+- ...
+
+You can apply an existing theme to your plot, or create your own
+
+The `theme` functions allows us to adjust the theme
+
+## Themes
+
+```{r, eval = F}
+boys %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( ) +
+  theme( panel.background = element_blank()
+       , axis.title.x=element_text( size=14, color="red" ))
+```
+
+## Themes
+
+```{r, echo = F, warning=F}
+boys %>%
+  ggplot( aes(x = age, y = bmi)) +
+  geom_point( ) +
+  theme( panel.background = element_blank()
+       , axis.title.x=element_text( size=14, color="red" ))
+```
+
+
+## Saving plots
+
+The `ggsave` functions makes saving plots easy
+
+```{r, eval=F}
+# Save as pdf
+ggsave( "/output/plot.pdf", myplot)
+
+# Save as png and resize
+ggsave( "/output/plot.png", myplot, width=7, height=5, units="in")
+```
+
+# Practical 
