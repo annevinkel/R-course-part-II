@@ -208,6 +208,7 @@ All lectures are in `html` format. Practicals are exercies. The practicals with 
 
 ### Thursday's materials
 
+- [Lecture E on Rmarkdown](Part F - Summary/Part-E1---Rmarkdown.html){target="_blank"}
 - [Lecture F on ggplot](Part F - Summary/Lecture_F_ggplot.html){target="_blank"}
 
 We adapt the course as we go. To ensure that you work with the latest iteration of the course materials, we advice all course participants to access the materials online.
